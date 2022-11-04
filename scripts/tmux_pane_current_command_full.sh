@@ -18,6 +18,14 @@ then
     exit 2
 fi
 
+tmux list-panes -t "$1" &> /dev/null
+if [[ $? -ne 0 ]]
+then
+	>&2 echo "No pane detected"
+	exit 3
+fi
+
+# `tmux display` doesn't match strictly and it will give you any pane if not found.
 pane_pid=$(tmux display -pt "$1" '#{pane_pid}')
 if [[ -z $pane_pid ]]
 then
@@ -33,3 +41,4 @@ then
 else
 	echo ''
 fi
+

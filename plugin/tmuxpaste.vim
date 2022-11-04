@@ -35,9 +35,9 @@ function! DetectRunningProgram(paneIdentifier)
 	" Detects if VIM or iPython is running on a tmux pane.
 	" Returns: 'vim', 'ipython', or 'others'
 	"
-	let runningProgram = system('bash ''' . g:plugin_dir . '/scripts/tmux_pane_current_command_full.sh ' . a:paneIdentifier)
+	let runningProgram = system("bash " . g:plugin_dir . "/scripts/tmux_pane_current_command_full.sh '" . a:paneIdentifier . "'")
 	if v:shell_error != 0
-		echo "Can't find the tmux pane using the identifier " . a:paneIdentifier
+		" echo "Can't find the tmux pane using the identifier " . a:paneIdentifier
 		return 'error'
 	endif
 
@@ -67,6 +67,17 @@ function! TmuxAddBuffer(content)
 endfunction
 
 function! TmuxPaste(targetPane, content, addReturn, targetProgram)
+	" Paste content to the targetPane.
+	" If addReturn is 1, then add a return at the end.
+	" targetProgram: 'vim', 'ipython', or 'others'
+	
+	" Check if the targetPane is present.
+	call system("tmux list-panes -t '" . a:targetPane . "'")
+	if v:shell_error != 0
+		echo "Can't find the tmux pane using the identifier " . a:targetPane
+		return 'error'
+	endif
+
 	call TmuxAddBuffer(a:content)
 	call system("tmux paste-buffer -t '" . a:targetPane . "' -b vim-tmuxpaste -p")
 
@@ -78,9 +89,9 @@ function! TmuxPaste(targetPane, content, addReturn, targetProgram)
 		endif
 	endif
 
-	let pastedPaneName = system("tmux display -pt '" . a:targetPane . "' '#{session_name}:#{window_index}.#{pane_index}'")
-	echom 'Paste to tmux: ' . pastedPaneName . ' (' . a:targetProgram . ')'
-	redraw
+	let pastedPaneName = trim(system("tmux display -pt '" . a:targetPane . "' '#{session_name}:#{window_index}.#{pane_index}'"))
+	echo 'Paste to tmux: ' . pastedPaneName . ' (' . a:targetProgram . ')'
+	redraw!
 endfunction
 
 function! NumberToPaneIdentifier(count)
