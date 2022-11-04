@@ -54,16 +54,29 @@ function! DetectRunningProgram(paneIdentifier)
 	return 'others'
 endfunction
 
-function! TmuxAddBuffer(content)
+function! TmuxAddBuffer(content, stripEmptyLines)
 	" Add content to the Tmux buffer.
 	" Paste using C-a ]
 	
-	let tempname = tempname()
-	" When splitting, do not strip the empty lines. (keepempty=1)
-	call writefile(split(a:content, "\n", 1), tempname, 'b')
+	if a:stripEmptyLines == 0
+		" When splitting, do not strip the empty lines back and forth. (keepempty=1)
+		" Stripping can result in not overwriting the file when it's empty.
+	
+		let splitContent = split(a:content, '\n', 1)
+	else
+		let splitContent = split(a:content, '\n', 0)
+	endif
 
-	call system("tmux load-buffer -b vim-tmuxpaste " . tempname)
-	call delete(tempname)
+	if empty(splitContent)
+		" If the content is empty, vimscript may not write a file,
+		" and tmux does not update the buffer with an empty string.
+		call system("tmux set-buffer -b vim-tmuxpaste '\n'")
+	else
+		let tempname = tempname()
+		call writefile(splitContent, tempname, 'b')
+		call system("tmux load-buffer -b vim-tmuxpaste " . tempname)
+		call delete(tempname)
+	endif
 endfunction
 
 function! TmuxPaste(targetPane, content, addReturn, targetProgram)
@@ -78,13 +91,20 @@ function! TmuxPaste(targetPane, content, addReturn, targetProgram)
 		return 'error'
 	endif
 
-	call TmuxAddBuffer(a:content)
+	if a:targetProgram ==# 'ipython'
+		" If the target pane is running ipython, strip empty lines to make it clean.
+		call TmuxAddBuffer(a:content, 1)
+	else
+		call TmuxAddBuffer(a:content, 0)
+	endif
+
 	call system("tmux paste-buffer -t '" . a:targetPane . "' -b vim-tmuxpaste -p")
 
 	if a:addReturn == 1
 		call system("tmux send-keys -t '" . a:targetPane . "' " . 'Enter')
-		if a:targetProgram ==? 'ipython'
+		if a:targetProgram ==? 'ipython' && len(split(a:content, "\n", 0)) > 1
 			" ipython needs two empty lines to execute the code.
+			" with an exception that it is a single line.
 			call system("tmux send-keys -t '" . a:targetPane . "' " . 'Enter')
 		endif
 	endif
@@ -130,5 +150,5 @@ vnoremap <silent> <leader>_ :<C-U>let pasteTarget='%' . v:count<CR>gv"sy:call Tm
 
 """""""""""""""
 " Copy to tmux buffer. You don't need to be on a tmux session to do this.
-nnoremap <silent> <C-_> "syy:call TmuxAddBuffer(@s)<CR>
-vnoremap <silent> <C-_> "sy:call TmuxAddBuffer(@s)<CR>
+nnoremap <silent> <C-_> "syy:call TmuxAddBuffer(@s, 0)<CR>
+vnoremap <silent> <C-_> "sy:call TmuxAddBuffer(@s, 0)<CR>
