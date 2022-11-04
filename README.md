@@ -1,4 +1,4 @@
-# vim-screenpaste
+# vim-tmuxpaste
 Vim plugin that lets you copy and paste to a different tmux pane.
 
 ![screenpaste-demo](https://user-images.githubusercontent.com/12980409/199625262-e4e6b901-11e8-47b9-8b30-91809281f6be.gif)
