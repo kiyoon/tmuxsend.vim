@@ -47,3 +47,16 @@ call plug#begin()
 Plug 'kiyoon/vim-tmuxpaste'
 call plug#end()
 ```
+
+# Recommended tmux.conf settings
+```tmux
+# Set the base index for windows to 1 instead of 0.
+set -g base-index 1
+
+# Set the base index for panes to 1 instead of 0.
+setw -g pane-base-index 1
+
+# Show pane details.
+set -g pane-border-status top
+set -g pane-border-format ' .#P (#D) #{pane_current_command} '
+```
