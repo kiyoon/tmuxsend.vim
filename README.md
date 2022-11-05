@@ -48,7 +48,7 @@ Plug 'kiyoon/vim-tmuxpaste'
 call plug#end()
 ```
 
-# Recommended tmux.conf settings
+## Recommended tmux.conf settings
 ```tmux
 # Set the base index for windows to 1 instead of 0.
 set -g base-index 1
