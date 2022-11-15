@@ -29,23 +29,8 @@ Note that it:
 ## Installation
 
 Use your favourite plugin manager. I use [vim-plug](https://github.com/junegunn/vim-plug).  
-TL; DR: just add the following lines to your `.vimrc`. It will install vim-plug and this plugin all together.
 ```vim
-" Install vim-plug if not found
-let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
-if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-endif
-
-" Run PlugInstall if there are missing plugins
-autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
-  \| PlugInstall --sync | source $MYVIMRC
-\| endif
-
-call plug#begin()
 Plug 'kiyoon/vim-tmuxpaste'
-call plug#end()
 ```
 
 ## Recommended tmux.conf settings
