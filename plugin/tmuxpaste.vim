@@ -35,19 +35,19 @@ function! DetectRunningProgram(paneIdentifier)
 	" Detects if VIM or iPython is running on a tmux pane.
 	" Returns: 'vim', 'ipython', or 'others'
 	"
-	let runningProgram = system("bash " . g:plugin_dir . "/scripts/tmux_pane_current_command_full.sh '" . a:paneIdentifier . "'")
+	let l:runningProgram = system(g:plugin_dir . "/scripts/tmux_pane_current_command_full.sh '" . a:paneIdentifier . "'")
 	if v:shell_error != 0
 		" echo "Can't find the tmux pane using the identifier " . a:paneIdentifier
 		return 'error'
 	endif
 
 	if empty(runningProgram)
-		return '-bash'
+		return '-shell'
 	else
-		let programName = system('tmux display -pt ' . a:paneIdentifier . " '#{pane_current_command}'")
-		if programName ==# 'vi' || programName ==# 'vim' || programName ==# 'nvim'
+		let l:programName = trim(system('tmux display -pt ' . a:paneIdentifier . " '#{pane_current_command}'"))
+		if l:programName ==# 'vi' || l:programName ==# 'vim' || l:programName ==# 'nvim'
 			return 'vim'
-		elseif stridx(runningProgram, '/ipython ') > 0
+		elseif stridx(l:runningProgram, '/ipython ') > 0
 			return 'ipython'
 		endif
 	endif
