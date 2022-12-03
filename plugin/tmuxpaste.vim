@@ -31,6 +31,20 @@ endif
 
 let plugin_dir = fnamemodify(fnamemodify(resolve(expand('<sfile>:p')), ':h'), ':h')
 
+
+function! NvimTreeFilePath()
+	" Get file path if NvimTree is open
+	if has('nvim') && &filetype == 'NvimTree'
+lua << EOF
+		nt_api = require('nvim-tree.api')
+		vim.l.filepath = nt_api.get_node_at_cursor().absolute_path
+EOF
+		return l:filepath
+	endif
+
+	return ''
+endfunction
+
 function! DetectRunningProgram(paneIdentifier)
 	" Detects if VIM or iPython is running on a tmux pane.
 	" Returns: 'vim', 'ipython', or 'others'
@@ -58,13 +72,29 @@ function! TmuxAddBuffer(content, stripEmptyLines)
 	" Add content to the Tmux buffer.
 	" Paste using C-a ]
 	
+	" NvimTree is open. Get the file path instead of copying the content.
+	if has('nvim') && &filetype == 'NvimTree'
+lua << EOF
+		print('nvimtree detected')
+		nt_api = require('nvim-tree.api')
+		vim.g.kiyoontmuxpasteContent = nt_api.tree.get_node_under_cursor().absolute_path
+		if vim.g.kiyoontmuxpasteContent == nil then
+			nt_nodes = nt_api.tree.get_nodes()
+			vim.g.kiyoontmuxpasteContent = nt_nodes.absolute_path 	-- root dir path
+		end
+EOF
+		let l:content = g:kiyoontmuxpasteContent
+	else
+		let l:content = a:content
+	endif
+	
 	if a:stripEmptyLines == 0
 		" When splitting, do not strip the empty lines back and forth. (keepempty=1)
 		" Stripping can result in not overwriting the file when it's empty.
 	
-		let splitContent = split(a:content, '\n', 1)
+		let splitContent = split(l:content, '\n', 1)
 	else
-		let splitContent = split(a:content, '\n', 0)
+		let splitContent = split(l:content, '\n', 0)
 	endif
 
 	if empty(splitContent)
