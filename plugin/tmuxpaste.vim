@@ -75,7 +75,6 @@ function! TmuxAddBuffer(content, stripEmptyLines)
 	" NvimTree is open. Get the file path instead of copying the content.
 	if has('nvim') && &filetype == 'NvimTree'
 lua << EOF
-		print('nvimtree detected')
 		nt_api = require('nvim-tree.api')
 		vim.g.kiyoontmuxpasteContent = nt_api.tree.get_node_under_cursor().absolute_path
 		if vim.g.kiyoontmuxpasteContent == nil then
