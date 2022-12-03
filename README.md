@@ -1,4 +1,4 @@
-# vim-tmuxpaste
+# tmuxpaste.vim
 Vim plugin that lets you copy and paste to a different tmux pane.
 
 ![screenpaste-demo](https://user-images.githubusercontent.com/12980409/199625262-e4e6b901-11e8-47b9-8b30-91809281f6be.gif)
@@ -30,6 +30,8 @@ require("nvim-tree").setup({
 })
 ```
 
+- It works great with [tmux-side-nvim-tree](https://github.com/kiyoon/tmux-side-nvim-tree)! Make your terminal like an IDE.
+
 
 ## Features
 - Press \<num\>- to copy and paste lines to tmux pane \<num\>.
@@ -50,7 +52,7 @@ require("nvim-tree").setup({
 
 Use your favourite plugin manager. I use [vim-plug](https://github.com/junegunn/vim-plug).  
 ```vim
-Plug 'kiyoon/vim-tmuxpaste'
+Plug 'kiyoon/tmuxpaste.vim'
 ```
 
 ## Recommended tmux.conf settings
