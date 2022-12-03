@@ -6,9 +6,29 @@ Vim plugin that lets you copy and paste to a different tmux pane.
 - For **interactive development**, similar to Jupyter Notebook. You can paste your code on a bash shell or an ipython interpreter.
 - Detects vim/neovim and ipython running, and paste within an appropriate paste mode.
 
+Tested mainly on Ubuntu and Windows WSL.
 
-Note that it:
-- Uses many system calls. Tested mainly on Ubuntu and Windows WSL.
+## Compatible plugins
+- It will detect [Nvim-Tree](https://github.com/nvim-tree/nvim-tree) and copy-paste the file's absolute path.
+
+Recommended to change Nvim-Tree's keybinding (remove '-' and use 'u' instead):
+
+```lua
+require("nvim-tree").setup({
+  -- ...
+  view = {
+	mappings = {
+	  list = {
+		{ key = "u", action = "dir_up" },
+	  },
+	},
+  },
+  remove_keymaps = {
+	  '-',
+  }
+  -- ...
+})
+```
 
 
 ## Features
