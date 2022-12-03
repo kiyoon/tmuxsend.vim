@@ -83,7 +83,7 @@ lua << EOF
 			vim.g.kiyoontmuxpasteContent = nt_nodes.absolute_path 	-- root dir path
 		end
 EOF
-		let l:content = "'" . g:kiyoontmuxpasteContent . "' "
+		let l:content = " '" . g:kiyoontmuxpasteContent . "'"
 	else
 		let l:content = a:content
 	endif
