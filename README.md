@@ -1,5 +1,6 @@
-# tmuxpaste.vim
-Vim plugin that lets you copy and paste to a different tmux pane.
+# tmuxsend.vim
+Vim plugin that lets you copy and paste to a different tmux pane.  
+Or, you can just copy to the tmux buffer for later.
 
 ![screenpaste-demo](https://user-images.githubusercontent.com/12980409/199625262-e4e6b901-11e8-47b9-8b30-91809281f6be.gif)
 
@@ -9,7 +10,7 @@ Vim plugin that lets you copy and paste to a different tmux pane.
 Tested mainly on Ubuntu and Windows WSL.
 
 ## Compatible plugins
-- It will detect [Nvim-Tree](https://github.com/nvim-tree/nvim-tree) and copy-paste the file's absolute path.
+- It will detect [Nvim-Tree](https://github.com/nvim-tree/nvim-tree) and copy-paste the file's absolute path.  
 
 Recommended to change Nvim-Tree's keybinding (remove '-' and use 'u' instead):
 
@@ -33,7 +34,7 @@ require("nvim-tree").setup({
 - It works great with [tmux-side-nvim-tree](https://github.com/kiyoon/tmux-side-nvim-tree)! Make your terminal like an IDE.
 
 
-## Features
+## Key bindings
 - Press \<num\>- to copy and paste lines to tmux pane \<num\>.
   - For example, `1-` will paste selection (or current line) to pane 1 on the current window.
 - If number not specified, then it will paste to pane 0.
@@ -52,7 +53,7 @@ require("nvim-tree").setup({
 
 Use your favourite plugin manager. I use [vim-plug](https://github.com/junegunn/vim-plug).  
 ```vim
-Plug 'kiyoon/tmuxpaste.vim'
+Plug 'kiyoon/tmuxsend.vim'
 ```
 
 ## Recommended tmux.conf settings
@@ -67,3 +68,11 @@ setw -g pane-base-index 1
 set -g pane-border-status top
 set -g pane-border-format ' .#P (#D) #{pane_current_command} '
 ```
+
+## Related project
+- [vim-slime](https://github.com/jpalardy/vim-slime)
+  - tmuxsend.vim can choose which pane to send, even in different windows, different session etc. 
+  - tmuxsend.vim can detect the target pane's running program for a better experience (e.g. detects vim and paste in paste mode)
+  - tmuxsend.vim does not rely on LSP so it's lighter. You can always use LSP's context to easily select function anyway ([treesitter](https://github.com/nvim-treesitter/nvim-treesitter-context)). Just grab the exact part you need.
+  - tmuxsend.vim can send [Nvim-Tree](https://github.com/nvim-tree/nvim-tree)'s files with absolute path to another pane.
+- [vim-screenpaste](https://github.com/kiyoon/vim-screenpaste) if you're using screen.
