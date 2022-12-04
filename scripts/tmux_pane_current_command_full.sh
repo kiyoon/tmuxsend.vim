@@ -33,12 +33,8 @@ then
 	exit 3
 fi
 
-command_pid=$(ps -el | awk "\$5==$pane_pid" | awk '{print $4}')
-if [[ ! -z $command_pid ]]	# sometimes no command is running
-then
-	full_command=$(ps --no-headers -u -p $command_pid | awk '{for(i=11;i<=NF;++i)printf $i" "}' )
-	echo "$full_command"
-else
-	echo ''
-fi
+# ps -el has different output on different systems, so we define our own format by -o
+# instead of cmd=, use command= for macOS compatibility.
 
+full_command=$(ps -e -o ppid= -o command= | awk "\$1==$pane_pid" | awk '{for(i=2;i<=NF;++i)printf $i" "}')
+echo "$full_command"

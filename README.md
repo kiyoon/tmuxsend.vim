@@ -7,7 +7,7 @@ Or, you can just copy to the tmux buffer for later.
 - For **interactive development**, similar to Jupyter Notebook. You can paste your code on a bash shell or an ipython interpreter.
 - Detects vim/neovim and ipython running, and paste within an appropriate paste mode.
 
-Tested mainly on Ubuntu and Windows WSL.
+Tested and working on Ubuntu, macOS and Windows WSL.
 
 ## Compatible plugins
 - It will detect [Nvim-Tree](https://github.com/nvim-tree/nvim-tree) and copy-paste the file's absolute path.  
