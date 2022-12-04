@@ -2,7 +2,7 @@
 Vim plugin that lets you copy and paste to a different tmux pane.  
 Or, you can just copy to the tmux buffer for later.
 
-![screenpaste-demo](https://user-images.githubusercontent.com/12980409/199625262-e4e6b901-11e8-47b9-8b30-91809281f6be.gif)
+<img src="https://user-images.githubusercontent.com/12980409/205471326-27ef838a-c164-42a7-a576-2f5af3be95a8.gif" width="100%"/>
 
 - For **interactive development**, similar to Jupyter Notebook. You can paste your code on a bash shell or an ipython interpreter.
 - Detects vim/neovim and ipython running, and paste within an appropriate paste mode.
