@@ -11,7 +11,7 @@ Tested and working on Ubuntu, macOS and Windows WSL.
 
 ## Compatible plugins
 - It will detect [Nvim-Tree](https://github.com/nvim-tree/nvim-tree) and copy-paste the file's absolute path.  
-- It works great with [tmux-side-nvim-tree](https://github.com/kiyoon/tmux-side-nvim-tree)! Make your terminal like an IDE.
+- It works great with [treemux](https://github.com/kiyoon/treemux) which shows Nvim-Tree within tmux! Make your terminal like an IDE.
 
 
 ## Key bindings
