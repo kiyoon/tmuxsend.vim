@@ -1,31 +1,11 @@
-" tmuxpaste.vim - Paste your code to another tmux pane.
+" tmuxsend.vim - Send your code to another tmux pane.
 " Maintainer:   Kiyoon Kim <https://kiyoon.kim/>
-" Version:      1.0
-"
-" Press <num>- to copy and paste lines to tmux pane <num>.
-" For example, 1- will paste selection (or current line)
-" to pane 1 on the current window.
-"
-" If number not specified, then it will paste to pane 0.
-"
-" If the number is >= 10, it will paste to the pane on another window.
-" For example, 12- will paste selection (or current line)
-" to window 1 pane 2.
-" 123- will paste selection (or current line)
-" to window 12 pane 3.
-"
-" Use <leader>- (typically \-) to copy using the unique pane identifier.
-" For example, 5\- will paste selection (or current line)
-" to the %5 pane.
-" Use `set -g pane-border-format "#D"` in the tmux.conf to see the pane identifier.
-"
-" Use _ instead of - to copy without hitting Return.
-" Use <C-_> to copy into the tmux buffer. You can paste using C-b ] (or commonly C-a ] depending on your setup.).
+" Version:      1.1
 
-if exists('g:loaded_tmuxpaste') || &compatible
+if exists('g:loaded_tmuxsend') || &compatible
   finish
 else
-  let g:loaded_tmuxpaste = 'yes'
+  let g:loaded_tmuxsend = 'yes'
 endif
 
 
@@ -76,13 +56,13 @@ function! TmuxAddBuffer(content, buffername, stripEmptyLines)
 	if has('nvim') && &filetype == 'NvimTree'
 lua << EOF
 		nt_api = require('nvim-tree.api')
-		vim.g.kiyoontmuxpasteContent = nt_api.tree.get_node_under_cursor().absolute_path
-		if vim.g.kiyoontmuxpasteContent == nil then
+		vim.g.kiyoontmuxsendContent = nt_api.tree.get_node_under_cursor().absolute_path
+		if vim.g.kiyoontmuxsendContent == nil then
 			nt_nodes = nt_api.tree.get_nodes()
-			vim.g.kiyoontmuxpasteContent = nt_nodes.absolute_path 	-- root dir path
+			vim.g.kiyoontmuxsendContent = nt_nodes.absolute_path 	-- root dir path
 		end
 EOF
-		let l:content = " '" . g:kiyoontmuxpasteContent . "'"
+		let l:content = " '" . g:kiyoontmuxsendContent . "'"
 	else
 		let l:content = a:content
 	endif
@@ -122,12 +102,12 @@ function! TmuxPaste(targetPane, content, addReturn, targetProgram)
 
 	if a:targetProgram ==# 'ipython'
 		" If the target pane is running ipython, strip empty lines to make it clean.
-		call TmuxAddBuffer(a:content, 1, 'vim-tmuxsend-temp')
+		call TmuxAddBuffer(a:content, 'vim-tmuxsend-temp', 1)
 	else
-		call TmuxAddBuffer(a:content, 0, 'vim-tmuxsend-temp')
+		call TmuxAddBuffer(a:content, 'vim-tmuxsend-temp', 0)
 	endif
 
-	call system("tmux paste-buffer -t '" . a:targetPane . "' -b vim-tmuxpaste -p")
+	call system("tmux paste-buffer -t '" . a:targetPane . "' -b vim-tmuxsend-temp -p")
 
 	if a:addReturn == 1
 		call system("tmux send-keys -t '" . a:targetPane . "' " . 'Enter')
@@ -181,5 +161,5 @@ xnoremap <Plug>(tmuxsend-uid-plain) :<C-U>let pasteTarget='%' . v:count<CR>gv"sy
 
 """""""""""""""
 " Copy to tmux buffer. You don't need to be on a tmux session to do this.
-nnoremap <Plug>(tmuxsend-tmuxbuffer) "syy:call TmuxAddBuffer(@s, 0, 'vim-tmuxsend')<CR>
-xnoremap <Plug>(tmuxsend-tmuxbuffer) "sy:call TmuxAddBuffer(@s, 0, 'vim-tmuxsend')<CR>
+nnoremap <Plug>(tmuxsend-tmuxbuffer) "syy:call TmuxAddBuffer(@s, 'vim-tmuxsend', 0)<CR>
+xnoremap <Plug>(tmuxsend-tmuxbuffer) "sy:call TmuxAddBuffer(@s, 'vim-tmuxsend', 0)<CR>
