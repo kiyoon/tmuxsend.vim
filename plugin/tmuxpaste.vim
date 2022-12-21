@@ -68,7 +68,7 @@ function! DetectRunningProgram(paneIdentifier)
 	return 'others'
 endfunction
 
-function! TmuxAddBuffer(content, stripEmptyLines)
+function! TmuxAddBuffer(content, buffername, stripEmptyLines)
 	" Add content to the Tmux buffer.
 	" Paste using C-a ]
 	
@@ -99,11 +99,11 @@ EOF
 	if empty(splitContent)
 		" If the content is empty, vimscript may not write a file,
 		" and tmux does not update the buffer with an empty string.
-		call system("tmux set-buffer -b vim-tmuxpaste '\n'")
+		call system("tmux set-buffer -b " . a:buffername . " '\n'")
 	else
 		let tempname = tempname()
 		call writefile(splitContent, tempname, 'b')
-		call system("tmux load-buffer -b vim-tmuxpaste " . tempname)
+		call system("tmux load-buffer -b " . a:buffername . " " . tempname)
 		call delete(tempname)
 	endif
 endfunction
@@ -122,9 +122,9 @@ function! TmuxPaste(targetPane, content, addReturn, targetProgram)
 
 	if a:targetProgram ==# 'ipython'
 		" If the target pane is running ipython, strip empty lines to make it clean.
-		call TmuxAddBuffer(a:content, 1)
+		call TmuxAddBuffer(a:content, 1, 'vim-tmuxsend-temp')
 	else
-		call TmuxAddBuffer(a:content, 0)
+		call TmuxAddBuffer(a:content, 0, 'vim-tmuxsend-temp')
 	endif
 
 	call system("tmux paste-buffer -t '" . a:targetPane . "' -b vim-tmuxpaste -p")
@@ -157,27 +157,29 @@ if !empty($TMUX)
 	" 2. yank using @s register.
 	" 3. detect if vim or ipython is running
 	" 4. execute paste command.
-	nnoremap <silent> - :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>"syy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
-	vnoremap <silent> - :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
+	nnoremap <Plug>(tmuxsend-smart) :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>"syy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
+	xnoremap <Plug>(tmuxsend-smart) :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
 	"""""""""""""""
 	" Same thing but <num>_ to paste without detecting running programs and without the return at the end.
-	nnoremap <silent> _ :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>"syy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
-	vnoremap <silent> _ :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
+	nnoremap <Plug>(tmuxsend-plain) :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>"syy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
+	xnoremap <Plug>(tmuxsend-plain) :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
 
 	""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 else
-	noremap <silent> - :<C-U>echo 'You are not in a tmux session. Use unique pane identifier. e.g. 5\- sends text to %5.'<CR>
-	noremap <silent> _ :<C-U>echo 'You are not in a tmux session. Use unique pane identifier. e.g. 5\- sends text to %5.'<CR>
+	nnoremap <Plug>(tmuxsend-smart) :<C-U>echo 'You are not in a tmux session. Use unique pane identifier. e.g. 5\- sends text to %5.'<CR>
+	xnoremap <Plug>(tmuxsend-smart) :<C-U>echo 'You are not in a tmux session. Use unique pane identifier. e.g. 5\- sends text to %5.'<CR>
+	nnoremap <Plug>(tmuxsend-plain) :<C-U>echo 'You are not in a tmux session. Use unique pane identifier. e.g. 5\- sends text to %5.'<CR>
+	xnoremap <Plug>(tmuxsend-plain) :<C-U>echo 'You are not in a tmux session. Use unique pane identifier. e.g. 5\- sends text to %5.'<CR>
 endif
 
 " pasting using the unique pane identifier. 5\- will paste to the pane %5.
-nnoremap <silent> <leader>- :<C-U>let pasteTarget='%' . v:count<CR>"syy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
-vnoremap <silent> <leader>- :<C-U>let pasteTarget='%' . v:count<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
+nnoremap <Plug>(tmuxsend-uid-smart) :<C-U>let pasteTarget='%' . v:count<CR>"syy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
+xnoremap <Plug>(tmuxsend-uid-smart) :<C-U>let pasteTarget='%' . v:count<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
 
-nnoremap <silent> <leader>_ :<C-U>let pasteTarget='%' . v:count<CR>"syy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
-vnoremap <silent> <leader>_ :<C-U>let pasteTarget='%' . v:count<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
+nnoremap <Plug>(tmuxsend-uid-plain) :<C-U>let pasteTarget='%' . v:count<CR>"syy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
+xnoremap <Plug>(tmuxsend-uid-plain) :<C-U>let pasteTarget='%' . v:count<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
 
 """""""""""""""
 " Copy to tmux buffer. You don't need to be on a tmux session to do this.
-nnoremap <silent> <C-_> "syy:call TmuxAddBuffer(@s, 0)<CR>
-vnoremap <silent> <C-_> "sy:call TmuxAddBuffer(@s, 0)<CR>
+nnoremap <Plug>(tmuxsend-tmuxbuffer) "syy:call TmuxAddBuffer(@s, 0, 'vim-tmuxsend')<CR>
+xnoremap <Plug>(tmuxsend-tmuxbuffer) "sy:call TmuxAddBuffer(@s, 0, 'vim-tmuxsend')<CR>

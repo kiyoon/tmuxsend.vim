@@ -9,25 +9,9 @@ Or, you can just copy to the tmux buffer for later.
 
 Tested and working on Ubuntu, macOS and Windows WSL.
 
-## Compatible plugins
+## Compatible Plugins
 - It will detect [Nvim-Tree](https://github.com/nvim-tree/nvim-tree) and copy-paste the file's absolute path.  
 - It works great with [treemux](https://github.com/kiyoon/treemux) which shows Nvim-Tree within tmux! Make your terminal like an IDE.
-
-
-## Key bindings
-- Press \<num\>- to copy and paste lines to tmux pane \<num\>.
-  - For example, `1-` will paste selection (or current line) to pane 1 on the current window.
-- If number not specified, then it will paste to pane 0.
-- If the number is >= 10, it will paste to the pane on another window.
-  - For example, 12- will paste selection (or current line) to window 1 pane 2.
-  - 123- will paste selection (or current line) to window 12 pane 3.
--
-- Use \<leader\>- (typically `\-`) to copy using the unique pane identifier.
-  - For example, `5\-` will paste selection (or current line) to the %5 pane.
-  - Use `set -g pane-border-format "#D"` in the tmux.conf to see the pane identifier.
-- Use _ instead of - to copy without hitting Return.
-- Use \<C-\_\> to copy into the tmux buffer. You can paste using C-b \] (or commonly C-a \] depending on your setup.).
-
 
 ## Installation
 
@@ -35,6 +19,52 @@ Use your favourite plugin manager. I use [vim-plug](https://github.com/junegunn/
 ```vim
 Plug 'kiyoon/tmuxsend.vim'
 ```
+
+## Features and Key Bindings
+
+The plugin does NOT come with default key bindings.  
+Example configs:  
+
+```vim
+" vimscript config
+nnoremap <silent> - <Plug>(tmuxsend-smart)	" `1-` sends a line to pane .1
+xnoremap <silent> - <Plug>(tmuxsend-smart)	" same, but for visual mode block
+nnoremap <silent> _ <Plug>(tmuxsend-plain)	" `1_` sends a line to pane .1 without adding a new line
+xnoremap <silent> _ <Plug>(tmuxsend-plain)
+nnoremap <silent> <space>- <Plug>(tmuxsend-uid-smart)	" `3<space>-` sends to pane %3
+xnoremap <silent> <space>- <Plug>(tmuxsend-uid-smart)
+nnoremap <silent> <space>_ <Plug>(tmuxsend-uid-plain)
+xnoremap <silent> <space>_ <Plug>(tmuxsend-uid-plain)
+nnoremap <silent> <C-_> <Plug>(tmuxsend-tmuxbuffer)		" `<C-_>` yanks to tmux buffer
+xnoremap <silent> <C-_> <Plug>(tmuxsend-tmuxbuffer)
+```
+
+```lua
+-- lua config
+local tsend_map_modes = {"n", "x"}
+local tsend_map_opts = {noremap = true, silent = true}
+vim.keymap.set(tsend_map_modes, "-", "<Plug>(tmuxsend-smart)", tsend_map_opts)
+vim.keymap.set(tsend_map_modes, "_", "<Plug>(tmuxsend-plain)", tsend_map_opts)
+vim.keymap.set(tsend_map_modes, "<space>-", "<Plug>(tmuxsend-uid-smart)", tsend_map_opts)
+vim.keymap.set(tsend_map_modes, "<space>_", "<Plug>(tmuxsend-uid-plain)", tsend_map_opts)
+vim.keymap.set(tsend_map_modes, "<C-_>", "<Plug>(tmuxsend-tmuxbuffer)", tsend_map_opts)
+```
+
+1. All functions support normal (n) and visual (x) modes. Normal mode mappings will send a single line.
+2. Smart / plain modes.
+  - smart: detect running program on the destination, and add new lines if they're shell or ipython.
+  - plain: do not add new line and send exactly the selected part.
+3. Choose pane with relative ID or unique ID (uid).
+  - uid makes it possible to send over sessions.
+  - For example, `5-` will paste selection (or current line) to the .5 pane.
+  - `5<space>-` will paste selection (or current line) to the %5 pane.
+  - Use `set -g pane-border-format "#D"` in the tmux.conf to see the pane unique identifier.
+4. Choose window by giving number >= 10.
+  - For example, `12-` will paste selection (or current line) to window 1 pane 2.
+  - `123-` will paste selection (or current line) to window 12 pane 3.
+5. Use `<C-_>` to copy into the tmux buffer. You can paste using `Prefix + ]`
+
+
 
 ## Recommended tmux.conf settings
 ```tmux
@@ -50,7 +80,7 @@ set -g pane-border-format ' .#P (#D) #{pane_current_command} '
 ```
 
 ## Recommended Nvim-Tree settings
-Recommended to change Nvim-Tree's keybinding (remove '-' and use 'u' instead):
+If using the example key bindings above, it is recommended to change Nvim-Tree's keybinding (remove '-' and use 'u' instead):
 
 ```lua
 require("nvim-tree").setup({
