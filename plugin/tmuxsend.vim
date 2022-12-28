@@ -6,13 +6,14 @@ if exists('g:loaded_tmuxsend') || &compatible
   finish
 else
   let g:loaded_tmuxsend = 'yes'
+  let g:tmuxsend_previous_pane = '.0'
 endif
 
 
 let plugin_dir = fnamemodify(fnamemodify(resolve(expand('<sfile>:p')), ':h'), ':h')
 
 
-function! NvimTreeFilePath()
+function! tmuxsend#NvimTreeFilePath()
 	" Get file path if NvimTree is open
 	if has('nvim') && &filetype == 'NvimTree'
 lua << EOF
@@ -25,17 +26,17 @@ EOF
 	return ''
 endfunction
 
-function! DetectRunningProgram(paneIdentifier)
+function! tmuxsend#DetectRunningProgram(paneIdentifier)
 	" Detects if VIM or iPython is running on a tmux pane.
 	" Returns: 'vim', 'ipython', or 'others'
 	"
-	let l:runningProgram = system(g:plugin_dir . "/scripts/tmux_pane_current_command_full.sh '" . a:paneIdentifier . "'")
+	let l:runningProgram = trim(system(g:plugin_dir . "/scripts/tmux_pane_current_command_full.sh '" . a:paneIdentifier . "'"))
 	if v:shell_error != 0
 		" echo "Can't find the tmux pane using the identifier " . a:paneIdentifier
 		return 'error'
 	endif
 
-	if empty(runningProgram)
+	if empty(l:runningProgram)
 		return '-shell'
 	else
 		let l:programName = trim(system('tmux display -pt ' . a:paneIdentifier . " '#{pane_current_command}'"))
@@ -48,7 +49,7 @@ function! DetectRunningProgram(paneIdentifier)
 	return 'others'
 endfunction
 
-function! TmuxAddBuffer(content, buffername, stripEmptyLines)
+function! tmuxsend#TmuxAddBuffer(content, buffername, stripEmptyLines)
 	" Add content to the Tmux buffer.
 	" Paste using C-a ]
 	
@@ -88,7 +89,7 @@ EOF
 	endif
 endfunction
 
-function! TmuxPaste(targetPane, content, addReturn, targetProgram)
+function! tmuxsend#TmuxPaste(targetPane, content, addReturn, targetProgram)
 	" Paste content to the targetPane.
 	" If addReturn is 1, then add a return at the end.
 	" targetProgram: 'vim', 'ipython', or 'others'
@@ -102,9 +103,9 @@ function! TmuxPaste(targetPane, content, addReturn, targetProgram)
 
 	if a:targetProgram ==# 'ipython'
 		" If the target pane is running ipython, strip empty lines to make it clean.
-		call TmuxAddBuffer(a:content, 'vim-tmuxsend-temp', 1)
+		call tmuxsend#TmuxAddBuffer(a:content, 'vim-tmuxsend-temp', 1)
 	else
-		call TmuxAddBuffer(a:content, 'vim-tmuxsend-temp', 0)
+		call tmuxsend#TmuxAddBuffer(a:content, 'vim-tmuxsend-temp', 0)
 	endif
 
 	call system("tmux paste-buffer -t '" . a:targetPane . "' -b vim-tmuxsend-temp -p")
@@ -121,13 +122,19 @@ function! TmuxPaste(targetPane, content, addReturn, targetProgram)
 	let pastedPaneName = trim(system("tmux display -pt '" . a:targetPane . "' '#{session_name}:#{window_index}.#{pane_index}'"))
 	echo 'Paste to tmux: ' . pastedPaneName . ' (' . a:targetProgram . ')'
 	redraw!
+
+	let g:tmuxsend_previous_pane = a:targetPane
 endfunction
 
-function! NumberToPaneIdentifier(count)
+function! tmuxsend#NumToPaneID(count)
 	" Pass v:count as input.
 	" Returns the tmux pane identifier.
 	" If count < 10, then it will find the pane within the same window. (.1, .2, ...)
 	" If count >= 10, then it will find the window and pane with the index. (11 -> 1.1, 12 -> 1.2, 123 -> 12.3, ...)
+	if a:count == 0
+		return g:tmuxsend_previous_pane
+	endif
+
 	return string(a:count)[:-2] . '.' . string(a:count)[-1:]
 endfunction
 
@@ -137,12 +144,12 @@ if !empty($TMUX)
 	" 2. yank using @s register.
 	" 3. detect if vim or ipython is running
 	" 4. execute paste command.
-	nnoremap <Plug>(tmuxsend-smart) :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>"syy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
-	xnoremap <Plug>(tmuxsend-smart) :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
+	nnoremap <Plug>(tmuxsend-smart) :<C-U>let pasteTarget=tmuxsend#NumToPaneID(v:count)<CR>"syy:call tmuxsend#TmuxPaste(pasteTarget, @s, 1, tmuxsend#DetectRunningProgram(pasteTarget))<CR>
+	xnoremap <Plug>(tmuxsend-smart) :<C-U>let pasteTarget=tmuxsend#NumToPaneID(v:count)<CR>gv"sy:call tmuxsend#TmuxPaste(pasteTarget, @s, 1, tmuxsend#DetectRunningProgram(pasteTarget))<CR>
 	"""""""""""""""
 	" Same thing but <num>_ to paste without detecting running programs and without the return at the end.
-	nnoremap <Plug>(tmuxsend-plain) :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>"syy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
-	xnoremap <Plug>(tmuxsend-plain) :<C-U>let pasteTarget=NumberToPaneIdentifier(v:count)<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
+	nnoremap <Plug>(tmuxsend-plain) :<C-U>let pasteTarget=tmuxsend#NumToPaneID(v:count)<CR>"syy:call tmuxsend#TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
+	xnoremap <Plug>(tmuxsend-plain) :<C-U>let pasteTarget=tmuxsend#NumToPaneID(v:count)<CR>gv"sy:call tmuxsend#TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
 
 	""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 else
@@ -153,13 +160,13 @@ else
 endif
 
 " pasting using the unique pane identifier. 5\- will paste to the pane %5.
-nnoremap <Plug>(tmuxsend-uid-smart) :<C-U>let pasteTarget='%' . v:count<CR>"syy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
-xnoremap <Plug>(tmuxsend-uid-smart) :<C-U>let pasteTarget='%' . v:count<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 1, DetectRunningProgram(pasteTarget))<CR>
+nnoremap <Plug>(tmuxsend-uid-smart) :<C-U>let pasteTarget='%' . v:count<CR>"syy:call tmuxsend#TmuxPaste(pasteTarget, @s, 1, tmuxsend#DetectRunningProgram(pasteTarget))<CR>
+xnoremap <Plug>(tmuxsend-uid-smart) :<C-U>let pasteTarget='%' . v:count<CR>gv"sy:call tmuxsend#TmuxPaste(pasteTarget, @s, 1, tmuxsend#DetectRunningProgram(pasteTarget))<CR>
 
-nnoremap <Plug>(tmuxsend-uid-plain) :<C-U>let pasteTarget='%' . v:count<CR>"syy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
+nnoremap <Plug>(tmuxsend-uid-plain) :<C-U>let pasteTarget='%' . v:count<CR>"syy:call tmuxsend#TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
 xnoremap <Plug>(tmuxsend-uid-plain) :<C-U>let pasteTarget='%' . v:count<CR>gv"sy:call TmuxPaste(pasteTarget, @s, 0, 'nodetect')<CR>
 
 """""""""""""""
 " Copy to tmux buffer. You don't need to be on a tmux session to do this.
-nnoremap <Plug>(tmuxsend-tmuxbuffer) "syy:call TmuxAddBuffer(@s, 'vim-tmuxsend', 0)<CR>
-xnoremap <Plug>(tmuxsend-tmuxbuffer) "sy:call TmuxAddBuffer(@s, 'vim-tmuxsend', 0)<CR>
+nnoremap <Plug>(tmuxsend-tmuxbuffer) "syy:call tmuxsend#TmuxAddBuffer(@s, 'vim-tmuxsend', 0)<CR>
+xnoremap <Plug>(tmuxsend-tmuxbuffer) "sy:call tmuxsend#TmuxAddBuffer(@s, 'vim-tmuxsend', 0)<CR>

@@ -63,6 +63,7 @@ vim.keymap.set(tsend_map_modes, "<C-_>", "<Plug>(tmuxsend-tmuxbuffer)", tsend_ma
   - For example, `12-` will paste selection (or current line) to window 1 pane 2.
   - `123-` will paste selection (or current line) to window 12 pane 3.
 5. Use `<C-_>` to copy into the tmux buffer. You can paste using `Prefix + ]`
+6. Omitting the number (e.g. running `-`) will use the previous pane again.
 
 
 
