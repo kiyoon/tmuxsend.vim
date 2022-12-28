@@ -13,19 +13,6 @@ endif
 let plugin_dir = fnamemodify(fnamemodify(resolve(expand('<sfile>:p')), ':h'), ':h')
 
 
-function! tmuxsend#NvimTreeFilePath()
-	" Get file path if NvimTree is open
-	if has('nvim') && &filetype == 'NvimTree'
-lua << EOF
-		nt_api = require('nvim-tree.api')
-		vim.l.filepath = nt_api.get_node_at_cursor().absolute_path
-EOF
-		return l:filepath
-	endif
-
-	return ''
-endfunction
-
 function! tmuxsend#DetectRunningProgram(paneIdentifier)
 	" Detects if VIM or iPython is running on a tmux pane.
 	" Returns: 'vim', 'ipython', or 'others'
