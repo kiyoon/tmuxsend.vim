@@ -87,14 +87,14 @@ If using the example key bindings above, it is recommended to change Nvim-Tree's
 require("nvim-tree").setup({
   -- ...
   view = {
-	mappings = {
-	  list = {
-		{ key = "u", action = "dir_up" },
-	  },
-	},
+    mappings = {
+      list = {
+        { key = "u", action = "dir_up" },
+      },
+    },
   },
   remove_keymaps = {
-	  '-',
+    '-',
   }
   -- ...
 })
