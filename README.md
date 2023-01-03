@@ -106,6 +106,6 @@ require("nvim-tree").setup({
   - tmuxsend.vim can choose which pane to send, even in different windows, different session etc. 
   - tmuxsend.vim can detect the target pane's running program for a better experience (e.g. detects vim and paste in paste mode)
   - tmuxsend.vim does not rely on LSP so it's lighter. Just grab the exact part you need.
-    - Tip: use LSP text objects ([treesitter](https://github.com/nvim-treesitter/nvim-treesitter-textobjects)) to easily select function/class/if/loop etc.  
+    - Tip: use [treesitter-textobjects](https://github.com/nvim-treesitter/nvim-treesitter-textobjects) to easily select function/class/if/loop etc.  
   - tmuxsend.vim can send [Nvim-Tree](https://github.com/nvim-tree/nvim-tree)'s files with absolute path to another pane.
 - [vim-screenpaste](https://github.com/kiyoon/vim-screenpaste) if you're using screen.
