@@ -15,9 +15,24 @@ Tested and working on Ubuntu, macOS and Windows WSL.
 
 ## Installation
 
-Use your favourite plugin manager. I use [vim-plug](https://github.com/junegunn/vim-plug).  
+Use your favourite plugin manager. With [vim-plug](https://github.com/junegunn/vim-plug),  
 ```vim
 Plug 'kiyoon/tmuxsend.vim'
+```
+
+With lazy.nvim,
+
+```lua
+  {
+    "kiyoon/tmuxsend.vim",
+    keys = {
+      { "-", "<Plug>(tmuxsend-smart)", mode = { "n", "x" } },
+      { "_", "<Plug>(tmuxsend-plain)", mode = { "n", "x" } },
+      { "<space>-", "<Plug>(tmuxsend-uid-smart)", mode = { "n", "x" } },
+      { "<space>_", "<Plug>(tmuxsend-uid-plain)", mode = { "n", "x" } },
+      { "<C-_>", "<Plug>(tmuxsend-tmuxbuffer)", mode = { "n", "x" } },
+    },
+  },
 ```
 
 ## Features and Key Bindings
@@ -41,6 +56,7 @@ xnoremap <silent> <C-_> <Plug>(tmuxsend-tmuxbuffer)
 
 ```lua
 -- lua config
+-- or, just use the lazy.nvim config so it will be lazy-loaded on key press.
 local tsend_map_modes = {"n", "x"}
 local tsend_map_opts = {noremap = true, silent = true}
 vim.keymap.set(tsend_map_modes, "-", "<Plug>(tmuxsend-smart)", tsend_map_opts)
