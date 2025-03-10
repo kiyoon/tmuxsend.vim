@@ -1,3 +1,6 @@
+> [!NOTE]
+> Use [tmux-send.nvim](https://github.com/kiyoon/tmux-send.nvim), a Lua re-write of this plugin.
+
 # tmuxsend.vim
 Vim plugin that lets you copy and paste to a different tmux pane.  
 Or, you can just copy to the tmux buffer for later.
